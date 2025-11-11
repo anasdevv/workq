@@ -19,6 +19,9 @@
         }
       }
     },
+    "test": {
+      "dependsOn": ["build"]
+    },
     "prune-lockfile": {
       "dependsOn": ["build"],
       "cache": true,
