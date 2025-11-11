@@ -6,6 +6,7 @@
   "tags": [],
   "targets": {
     "build": {
+      "dependsOn": ["generate-types"],
       "executor": "nx:run-commands",
       "options": {
         "command": "webpack-cli build",
@@ -59,6 +60,18 @@
         "production": {
           "buildTarget": "workq-auth:build:production"
         }
+      }
+    },
+    "generate-types": {
+      "command": "prisma generate",
+      "options": {
+        "cwd": "apps/workq-auth"
+      }
+    },
+    "migrate-prisma": {
+      "command": "prisma migrate dev",
+      "options": {
+        "cwd": "apps/workq-auth"
       }
     }
   }
