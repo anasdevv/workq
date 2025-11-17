@@ -1,17 +1,16 @@
 {
-  "name": "workq-auth",
+  "name": "workq-jobs",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/workq-auth/src",
+  "sourceRoot": "apps/workq-jobs/src",
   "projectType": "application",
   "tags": [],
   "targets": {
     "build": {
-      "dependsOn": ["generate-prisma", "generate-ts-proto"],
       "executor": "nx:run-commands",
       "options": {
         "command": "webpack-cli build",
         "args": ["--node-env=production"],
-        "cwd": "apps/workq-auth"
+        "cwd": "apps/workq-jobs"
       },
       "configurations": {
         "development": {
@@ -19,16 +18,13 @@
         }
       }
     },
-    "test": {
-      "dependsOn": ["build"]
-    },
     "prune-lockfile": {
       "dependsOn": ["build"],
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/apps/workq-auth/package.json",
-        "{workspaceRoot}/dist/apps/workq-auth/package-lock.json"
+        "{workspaceRoot}/dist/apps/workq-jobs/package.json",
+        "{workspaceRoot}/dist/apps/workq-jobs/package-lock.json"
       ],
       "options": {
         "buildTarget": "build"
@@ -37,7 +33,7 @@
     "copy-workspace-modules": {
       "dependsOn": ["build"],
       "cache": true,
-      "outputs": ["{workspaceRoot}/dist/apps/workq-auth/workspace_modules"],
+      "outputs": ["{workspaceRoot}/dist/apps/workq-jobs/workspace_modules"],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {
         "buildTarget": "build"
@@ -53,34 +49,17 @@
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "workq-auth:build",
+        "buildTarget": "workq-jobs:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "workq-auth:build:development"
+          "buildTarget": "workq-jobs:build:development"
         },
         "production": {
-          "buildTarget": "workq-auth:build:production"
+          "buildTarget": "workq-jobs:build:production"
         }
       }
-    },
-    "generate-prisma": {
-      "command": "prisma generate",
-      "options": {
-        "cwd": "apps/workq-auth",
-        "input": ["prisma/schema.prisma"]
-      },
-      "cache": true
-    },
-    "migrate-prisma": {
-      "command": "prisma migrate dev",
-      "options": {
-        "cwd": "apps/workq-auth"
-      }
-    },
-    "generate-ts-proto": {
-      "command": "nx generate-ts-proto"
     }
   }
 }
