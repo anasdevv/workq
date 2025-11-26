@@ -14,10 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    // decorat
-    // "experimentalDecorators"
     "paths": {
-      "@workq/nestjs": ["libs/nestjs/src/index.ts"]
+      "@workq/nestjs": ["libs/nestjs/src/index.ts"],
+      "@workq/pulsar": ["libs/pulsar/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

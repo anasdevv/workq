@@ -4,11 +4,13 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { JobsModule } from './jobs/jobs.module';
+import { JobsModule } from './jobs.module';
 
 @Module({
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     JobsModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,

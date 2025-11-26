@@ -6,3 +6,10 @@ services:
     environment:
       POSTGRES_USER: workq_user
       POSTGRES_PASSWORD: workq_password
+
+  pulsar:
+    image: apachepulsar/pulsar:latest
+    ports:
+      - 6650:6650
+    command: >
+      /pulsar/bin/pulsar standalone

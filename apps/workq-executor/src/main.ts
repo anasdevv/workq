@@ -1,12 +1,11 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { init } from '@workq/nestjs';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { ConfigService } from '@nestjs/config';
-import * as cookieParser from 'cookie-parser';
-import { init } from '@workq/nestjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await init(app);
 }
+
 bootstrap();
