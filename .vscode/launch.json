@@ -4,9 +4,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug workq-auth with Nx",
+      "name": "Debug auth with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "workq-auth"],
+      "runtimeArgs": ["nx", "serve", "auth"],
       "env": {
         "NODE_OPTIONS": "--inspect=9229"
       },
@@ -15,16 +15,16 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/apps/workq-auth/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/apps/auth/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug workq-jobs with Nx",
+      "name": "Debug jobs with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "workq-jobs"],
+      "runtimeArgs": ["nx", "serve", "jobs"],
       "env": {
         "NODE_OPTIONS": "--inspect=9230"
       },
@@ -33,16 +33,16 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/apps/workq-jobs/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/apps/jobs/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug workq-executor with Nx",
+      "name": "Debug executor with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "workq-executor"],
+      "runtimeArgs": ["nx", "serve", "executor"],
       "env": {
         "NODE_OPTIONS": "--inspect=9231"
       },
@@ -51,7 +51,7 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/apps/workq-executor/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/apps/executor/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     }

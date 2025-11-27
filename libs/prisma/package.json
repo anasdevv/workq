@@ -1,0 +1,10 @@
+{
+  "name": "@workq/prisma",
+  "version": "0.0.0",
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "prisma": "^5.18.0"
+  },
+  "devDependencies": {},
+  "license": "MIT"
+}

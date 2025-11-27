@@ -17,9 +17,9 @@ export interface DeadLetterConfig {
 
 export interface IdempotencyConfig {
   enabled: boolean;
-  ttlMs?: number; // Time-to-live for deduplication entries (default 1 hour)
-  useMessageId?: boolean; // Use Pulsar message ID vs custom idempotency key
-  idempotencyKeyProperty?: string; // Property name for custom idempotency key
+  ttlMs?: number;
+  useMessageId?: boolean; // use Pulsar message ID vs custom idempotency key
+  idempotencyKeyProperty?: string;
 }
 
 export interface ConsumerConfig {
@@ -60,7 +60,6 @@ export abstract class PulsarConsumer<T> {
       },
     };
 
-    // Initialize deduplication store if idempotency is enabled
     if (this.config.idempotency?.enabled) {
       this.deduplicationStore = new DeduplicationStore(
         this.config.idempotency.ttlMs
@@ -75,7 +74,6 @@ export abstract class PulsarConsumer<T> {
       this.listener.bind(this)
     );
 
-    // Initialize dead-letter producer if enabled
     if (this.config.deadLetter?.enabled) {
       this.deadLetterProducer = await this.pulsarClient.createProducer(
         this.config.deadLetter.topic!
@@ -90,7 +88,6 @@ export abstract class PulsarConsumer<T> {
     const data = deserialize<T>(message.getData());
     this.logger.debug(`Received message: ${JSON.stringify(data)}`);
 
-    // Check for duplicate message (idempotency)
     if (this.config.idempotency?.enabled && this.deduplicationStore) {
       const messageKey = this.getMessageKey(message);
 
@@ -129,10 +126,8 @@ export abstract class PulsarConsumer<T> {
 
   private getMessageKey(message: Message): string {
     if (this.config.idempotency?.useMessageId) {
-      // Use Pulsar's built-in message ID
       return message.getMessageId().toString();
     } else {
-      // Use custom idempotency key from message properties
       const properties = message.getProperties();
       const key =
         properties[
