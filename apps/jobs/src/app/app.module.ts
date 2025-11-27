@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JobsModule } from './jobs.module';
 import { LoggerModule } from '@workq/nestjs';
+import { GqlLoggerPlugin } from '@workq/graphql';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LoggerModule } from '@workq/nestjs';
     JobsModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
+      plugins: [new GqlLoggerPlugin()],
       playground: {
         settings: {
           'request.credentials': 'include',

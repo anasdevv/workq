@@ -4,6 +4,21 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug All Services",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/apps/*/dist/**/*.(m|c|)js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug auth with Nx",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["nx", "serve", "auth"],

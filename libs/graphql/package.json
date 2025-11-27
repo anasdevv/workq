@@ -7,6 +7,5 @@
     "@nestjs/graphql": "^12.2.0",
     "graphql": "^16.9.0"
   },
-  "devDependencies": {},
   "license": "MIT"
 }

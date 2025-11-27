@@ -1,81 +1,295 @@
 # Workq
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A distributed job processing system built with NestJS, Apache Pulsar, and Nx monorepo architecture.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## 🏗️ Architecture Overview
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+Workq is a microservices-based job processing platform with the following components:
 
-## Finish your CI setup
+- **Auth Service** - GraphQL API for user authentication with JWT and gRPC
+- **Jobs Service** - GraphQL API for job submission and management
+- **Executor Service** - Background worker that processes jobs from message queues
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/I9JagzKsbq)
+### Technology Stack
 
-## Run tasks
+- **Framework**: NestJS
+- **Message Queue**: Apache Pulsar
+- **Database**: PostgreSQL with Prisma ORM
+- **API**: GraphQL with Apollo Server
+- **RPC**: gRPC for inter-service communication
+- **Monorepo**: Nx workspace
+- **Authentication**: JWT with Passport
+- **Logging**: Pino
 
-To run the dev server for your app, use:
+## 📁 Project Structure
 
-```sh
-npx nx serve auth
+```
+workq/
+├── apps/
+│   ├── auth/          # Authentication service (GraphQL + gRPC)
+│   ├── jobs/          # Job management service (GraphQL)
+│   └── executor/      # Job execution worker
+├── libs/
+│   ├── graphql/       # Shared GraphQL utilities and guards
+│   ├── grpc/          # gRPC protocol definitions
+│   ├── nestjs/        # Shared NestJS utilities (logging, init)
+│   ├── prisma/        # Database client and schemas
+│   └── pulsar/        # Apache Pulsar client and consumer abstractions
+└── docker-compose.yml # Local development environment
 ```
 
-To create a production bundle:
+## 🚀 Getting Started
 
-```sh
+### Prerequisites
+
+- Node.js 18+
+- Docker and Docker Compose
+- npm or yarn
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start infrastructure (PostgreSQL, Pulsar)
+docker-compose up -d
+
+# Run database migrations
+npx prisma migrate dev --schema apps/auth/prisma/schema.prisma
+```
+
+### Running Services
+
+```bash
+# Run all services in development mode
+npm start
+
+# Or run individual services
+npx nx serve auth      # http://localhost:3000
+npx nx serve jobs      # http://localhost:3001
+npx nx serve executor  # Background worker
+```
+
+## 🔑 Key Features
+
+### Distributed Job Processing
+
+- **Job Submission**: Submit jobs via GraphQL API
+- **Message Queue**: Apache Pulsar for reliable message delivery
+- **Retry Logic**: Configurable retry with exponential backoff
+- **Dead Letter Queue**: Failed messages sent to DLQ for investigation
+- **Idempotency**: Prevent duplicate message processing
+
+### Authentication & Authorization
+
+- **User Management**: Create and authenticate users
+- **JWT Tokens**: Secure token-based authentication
+- **GraphQL Guards**: Protected queries and mutations
+- **gRPC Auth Service**: Inter-service authentication
+
+### Reliability Features
+
+The Pulsar consumer implementation includes:
+
+- **Retry Configuration**: Configurable max retries with exponential backoff
+- **Dead Letter Queue**: Automatic routing of failed messages
+- **Idempotent Processing**: Deduplication store prevents duplicate processing
+- **Message Properties**: Track retry count and error details
+
+### Example: Fibonacci Job
+
+A sample job implementation demonstrating the job processing pipeline:
+
+```typescript
+// Submit a job
+mutation {
+  executeJob(executeJobInput: {
+    name: "Fibonacci"
+    data: { iterations: 10 }
+  }) {
+    name
+    description
+  }
+}
+```
+
+## 📚 Core Libraries
+
+### @workq/pulsar
+
+Message queue abstraction with built-in reliability features:
+
+- `PulsarClient` - Client for creating producers and consumers
+- `PulsarConsumer` - Abstract consumer with retry/DLQ support
+- `DeduplicationStore` - In-memory idempotency tracking
+- Idempotency Utilities - Key generation helpers
+
+### @workq/graphql
+
+Shared GraphQL utilities:
+
+- `AbstractModel` - Base GraphQL model with ID
+- `GraphQLContext` - Request/response context
+- `GqlAuthGuard` - Authentication guard using gRPC
+
+### @workq/nestjs
+
+NestJS initialization and logging:
+
+- `init` - Common app initialization (validation, logging, cookies)
+- `LoggerModule` - Pino logger configuration
+
+### @workq/grpc
+
+gRPC service definitions for inter-service communication.
+
+## 🛠️ Development
+
+### Building
+
+```bash
+# Build all projects
+npx nx run-many -t build
+
+# Build specific project
 npx nx build auth
 ```
 
-To see all available targets to run for a project, run:
+### Testing
 
-```sh
+```bash
+# Run tests
+npx nx test auth
+
+# Run tests for all projects
+npx nx run-many -t test
+```
+
+### Linting
+
+```bash
+# Lint all projects
+npx nx run-many -t lint
+
+# Auto-fix issues
+npx nx run-many -t lint --fix
+```
+
+### Code Quality
+
+Pre-commit hooks are configured with Husky and lint-staged:
+
+- ESLint for code quality
+- Prettier for formatting
+- Staged files only
+
+## 🐳 Docker Deployment
+
+Each service has a multi-stage Dockerfile:
+
+```bash
+# Build auth service image
+docker build -f apps/auth/Dockerfile -t workq-auth .
+
+# Build jobs service image
+docker build -f apps/jobs/Dockerfile -t workq-jobs .
+
+# Build executor service image
+docker build -f apps/executor/Dockerfile -t workq-executor .
+```
+
+## 📖 API Documentation
+
+### Authentication Service (Port 3000)
+
+**GraphQL Endpoints:**
+
+- `mutation createUser` - Create a new user
+- `mutation login` - Authenticate and receive JWT cookie
+- `query users` - Get all users (requires authentication)
+
+**gRPC Service:**
+
+- `AuthService.authenticate` - Validate JWT tokens
+
+### Jobs Service (Port 3001)
+
+**GraphQL Endpoints:**
+
+- `query jobs` - List all available job types
+- `mutation executeJob` - Submit a job for processing
+
+## 🔒 Security
+
+- JWT tokens stored in HTTP-only cookies
+- Password hashing with bcrypt
+- GraphQL authentication guards
+- gRPC authentication for inter-service calls
+- Input validation with class-validator
+- Environment-based configuration
+
+## 🔧 Configuration
+
+Environment variables (create `.env` files for each service):
+
+```bash
+# Auth Service
+PORT=3000
+JWT_SECRET=your-secret-key
+JWT_EXPIRATION_MS=3600000
+DATABASE_URL=postgresql://user:pass@localhost:5432/auth
+PULSAR_SERVICE_URL=pulsar://localhost:6650
+
+# Jobs Service
+PORT=3001
+PULSAR_SERVICE_URL=pulsar://localhost:6650
+
+# Executor Service
+PULSAR_SERVICE_URL=pulsar://localhost:6650
+```
+
+## 📦 Workspace Management
+
+This project uses [Nx](https://nx.dev) for monorepo management:
+
+```bash
+# Visualize project dependencies
+npx nx graph
+
+# Show project details
 npx nx show project auth
+
+# Run affected tests
+npx nx affected -t test
+
+# Generate new library
+npx nx g @nx/node:lib my-lib
+
+# Generate new app
+npx nx g @nx/nest:app my-app
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🤝 Contributing
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
 
-## Add new projects
+## 📄 License
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+MIT
 
-Use the plugin's generator to create new projects.
+## 🔗 Useful Links
 
-To generate a new application, use:
+- [Nx Documentation](https://nx.dev)
+- [NestJS Documentation](https://docs.nestjs.com)
+- [Apache Pulsar Documentation](https://pulsar.apache.org/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [GraphQL Documentation](https://graphql.org/learn)
 
-```sh
-npx nx g @nx/nest:app demo
-```
+---
 
-To generate a new library, use:
-
-```sh
-npx nx g @nx/node:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Built with ❤️ using [Nx](https://nx.dev) and [NestJS](https://nestjs.com)

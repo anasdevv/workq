@@ -4,7 +4,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { TokenPayload } from '../token-payload.interface';
-import { User } from '../../users/models/user.model';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -12,6 +11,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: any) => {
+          console.log(
+            'JwtStrategy token:',
+            req?.cookies?.Authorization || req?.token
+          );
           return req?.cookies?.Authorization || req?.token;
         },
       ]),
@@ -20,6 +23,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: TokenPayload) {
+    console.log('JwtStrategy payload:', payload);
+    if (!payload || !payload.userId) {
+      throw new Error('Invalid token payload');
+    }
     return payload;
   }
 }
